@@ -1,6 +1,6 @@
 package id.tomatech.tutorial;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ public class PeopleController {
 	 * @return
 	 */
 	@RequestMapping(value= "/list", method=RequestMethod.GET)
-	public Collection<Person> listPeople() {
+	public List<Person> listPeople() {
 		LOGGER.info("List people");
 		return personRepository.findAll();
 	}

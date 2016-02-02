@@ -289,7 +289,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
 Ya, cuma interface, object dari PersonRepository ini akan dibuat oleh internal Spring, selanjutnya kita tinggal menggunakan.
 
-##Controller Class
+###Controller Class
 Seperti yg sudah dibahas sebelumnya, controller adalah kelas untuk meng-handle request dari client (browser atau mobile app). Mirip dengan yg sebelumnya kita coba, _list people_, _find person by id_, _add_.
 
 Buat kelas ```PeopleController```, lalu edit isinya sehingga seperti potongan kode berikut ini.
@@ -300,8 +300,6 @@ package id.tomatech.tutorial;
 /**
  * Import tidak perlu diketik, di STS gunakan Ctrl+Shift+O
  */
-import java.util.Collection;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -324,7 +322,7 @@ public class PeopleController {
 }
 ```
 
-###Handle Add/Save Person Request
+####Handle Add/Save Person Request
 Untuk tujuan ini, buat satu method dalam ```PeopleController```, seperti potongan kode berikut ini
 
 ```java
@@ -348,11 +346,11 @@ Coba jalankan aplikasinya, kemudian test menggunakan Postman (atau curl). Pada P
 
 Cek dalam table database ```people```, apakah ada record baru yg masuk. Atau check melalu browser dengan alamat ```http://localhost:8080/people/list```.
 
-###Handle List People Request
+####Handle List People Request
 Untuk tujuan ini, buat satu method dalam ```PeopleController```, seperti potongan kode berikut ini
 ```java
 	@RequestMapping(value= "/list", method=RequestMethod.GET)
-	public Collection<Person> listPeople() {
+	public List<Person> listPeople() {
 		LOGGER.info("List people");
 		return personRepository.findAll();
 	}
@@ -360,7 +358,7 @@ Untuk tujuan ini, buat satu method dalam ```PeopleController```, seperti potonga
 
 Coba di web browser, arahkan ke url ```http://localhost:8080/people/list```.
 
-###Handle Find Person By Id
+####Handle Find Person By Id
 Untuk tujuan ini, buat satu method dalam ```PeopleController```, seperti potongan kode berikut ini
 ```java
 	@RequestMapping(value="/detail/{personId}", method=RequestMethod.GET)
@@ -375,6 +373,80 @@ Untuk tujuan ini, buat satu method dalam ```PeopleController```, seperti potonga
 ```
 
 Coba di web browser, arahkan ke url ```http://localhost:8080/people/detail/1```. Dengan anggapan, Person dengan id 1 ada dalam database.
+
+####All
+Berikut ini adalah tampilan keseluruan kelas controller yg sebelumnya dibuat
+
+```java
+package id.tomatech.tutorial;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Handle request dari client, browser atau mobile app.
+ * 
+ * @author zakyalvan
+ */
+@RestController
+@RequestMapping(value="/people")
+public class PeopleController {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PeopleController.class);
+	
+	@Autowired
+	private PersonRepository personRepository;
+	
+	/**
+	 * Handle create user request.
+	 * 
+	 * @param person
+	 * @return
+	 */
+	@RequestMapping(value="/register", method=RequestMethod.POST)
+	public HttpEntity<Person> registerPerson(@RequestBody Person person) {
+		Person newPerson = personRepository.save(person);
+		return new ResponseEntity<>(newPerson, HttpStatus.OK);
+	}
+	
+	/**
+	 * List all people.
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value= "/list", method=RequestMethod.GET)
+	public List<Person> listPeople() {
+		LOGGER.info("List people");
+		return personRepository.findAll();
+	}
+	
+	/**
+	 * Retrieve person by id.
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value="/detail/{personId}", method=RequestMethod.GET)
+	public HttpEntity<Person> detailPerson(@PathVariable(value="personId") Long id) {
+		LOGGER.info("Retrieve person with id {}", id);
+		if(!personRepository.exists(id)) {
+			return new ResponseEntity<Person>(HttpStatus.NOT_FOUND);
+		}
+		
+		return new ResponseEntity<Person>(personRepository.findOne(id), HttpStatus.OK);
+	}
+}
+```
 
 ##Tugas
 - Commit dan push project yang kalian coba ke github kalian, email ke saya alamatnya.
